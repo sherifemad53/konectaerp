@@ -4,9 +4,13 @@ namespace UserManagementService.Services;
 
 public interface IUserService
 {
-    Task<User?> GetByIdAsync(int id);
+    Task<User?> GetByIdAsync(Guid id);
+    Task<User?> GetByIdWithRolesAsync(Guid id);
     Task<IEnumerable<User>> GetAllAsync();
-    Task<User> CreateAsync(User user);
-    Task<User?> UpdateAsync(int id, User user);
-    Task<bool> DeleteAsync(int id);
+    Task<IEnumerable<User>> GetAllWithRolesAsync();
+    Task<User> CreateAsync(User user, List<Guid>? roleIds = null);
+    Task<User?> UpdateAsync(Guid id, User user, List<Guid>? roleIds = null);
+    Task<bool> DeleteAsync(Guid id);
+    Task<bool> AssignRolesAsync(Guid userId, List<Guid> roleIds);
+    Task<bool> RemoveRoleAsync(Guid userId, Guid roleId);
 }

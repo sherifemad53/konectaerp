@@ -4,8 +4,12 @@ namespace UserManagementService.Dtos;
 
 public class RoleDto
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [Required]
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
+    
+    public string? Description { get; set; }
+    
+    public DateTime CreatedAt { get; set; }
 }

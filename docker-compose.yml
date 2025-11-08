@@ -1,23 +1,47 @@
 services:
-  # PostgreSQL Database
-  postgres:
+  # PostgreSQL Database for AuthenticationService
+  postgres-auth:
     build:
       context: ./database
       dockerfile: Dockerfile
-    container_name: konecta-postgres
+    container_name: konecta-postgres-auth
     environment:
-      POSTGRES_DB: konecta_erp
+      POSTGRES_DB: konecta_auth
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres123
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_auth_data:/var/lib/postgresql/data
     networks:
       - konecta-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d konecta_erp"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d konecta_auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # PostgreSQL Database for UserManagementService
+  postgres-user:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: konecta-postgres-user
+    environment:
+      POSTGRES_DB: konecta_user
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    networks:
+      - konecta-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d konecta_user"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,7 +56,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5001
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=konecta_erp;Username=postgres;Password=postgres123
+      - ConnectionStrings__DefaultConnection=Host=postgres-auth;Port=5432;Database=konecta_auth;Username=postgres;Password=postgres123
       - JwtSettings__SecretKey=YourSuperSecretKeyForJWTTokenGenerationMinimum32Characters
       - JwtSettings__Issuer=KonectaERP
       - JwtSettings__Audience=KonectaERPUsers
@@ -42,12 +66,45 @@ services:
     ports:
       - "5001:5001"
     depends_on:
-      postgres:
+      postgres-auth:
         condition: service_healthy
     networks:
       - konecta-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # User Management Service
+  user-management-service:
+    build:
+      context: ./backend/UserManagementService
+      dockerfile: Dockerfile
+    container_name: konecta-user-management-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5002
+      - ConnectionStrings__DefaultConnection=Host=postgres-user;Port=5432;Database=konecta_user;Username=postgres;Password=postgres123
+      - JwtSettings__SecretKey=YourSuperSecretKeyForJWTTokenGenerationMinimum32Characters
+      - JwtSettings__Issuer=KonectaERP
+      - JwtSettings__Audience=KonectaERPUsers
+      - Consul__Enabled=true
+      - ServiceConfig__Host=user-management-service
+      - ServiceConfig__Port=5002
+    ports:
+      - "5002:5002"
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+      authentication-service:
+        condition: service_healthy
+    networks:
+      - konecta-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -66,6 +123,8 @@ services:
       - "4200:80"
     depends_on:
       authentication-service:
+        condition: service_healthy
+      user-management-service:
         condition: service_healthy
     networks:
       - konecta-network
@@ -104,7 +163,9 @@ networks:
     name: konecta-network
 
 volumes:
-  postgres_data:
-    name: konecta_postgres_data
+  postgres_auth_data:
+    name: konecta_postgres_auth_data
+  postgres_user_data:
+    name: konecta_postgres_user_data
   redis_data:
     name: konecta_redis_data
