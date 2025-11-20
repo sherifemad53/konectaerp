@@ -67,21 +67,21 @@ module "mailhog" {
   vpc_connector = google_vpc_access_connector.serverless_connector.name
 }
 
-module "consul" {
-  source = "../modules/cloud_run"
+# module "consul" {
+#   source = "../modules/cloud_run"
 
-  service_name = "consul"
-  region       = var.region
-  project_id   = var.project_id
+#   service_name = "consul"
+#   region       = var.region
+#   project_id   = var.project_id
 
-  image                 = "hashicorp/consul:1.18"
-  port                  = 8500
-  auth                  = "private"
-  ingress               = "INGRESS_TRAFFIC_INTERNAL_ONLY"
-  environment_variables = {}
-  custom_args           = ["agent", "-server", "-bootstrap", "-ui", "-client=0.0.0.0"]
-  min_instances         = 1
-  max_instances         = 1
-  service_account_email = module.service_account.email
-  vpc_connector         = google_vpc_access_connector.serverless_connector.name
-}
+#   image                 = "hashicorp/consul:1.18"
+#   port                  = 8500
+#   auth                  = "private"
+#   ingress               = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+#   environment_variables = {}
+#   custom_args           = ["agent", "-server", "-bootstrap", "-ui", "-client=0.0.0.0"]
+#   min_instances         = 1
+#   max_instances         = 1
+#   service_account_email = module.service_account.email
+#   vpc_connector         = google_vpc_access_connector.serverless_connector.name
+# }

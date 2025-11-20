@@ -12,7 +12,7 @@ env:
   IMAGE_NAME: "${{secrets.REPO_URL}}/config-server-service"
 
 jobs:
-  deploy:
+  build and Push:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -40,6 +40,12 @@ jobs:
       - name: Push Image
         run: docker push ${{env.IMAGE_NAME}}:${{github.sha}}
 
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
