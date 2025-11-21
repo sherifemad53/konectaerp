@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hr-service-config
+  namespace: default
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  SPRING__APPLICATION__NAME: "hr-service"
+  SPRING__CLOUD__CONFIG__URI: "http://config-server:8888"
+  SPRING__CLOUD__CONFIG__FAILFAST: "true"
+  Consul__Host: "http://consul-server:8500"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hr-service
+  namespace: default
+  labels:
+    app: hr-service
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hr-service
+  template:
+    metadata:
+      labels:
+        app: hr-service
+        component: backend
+    spec:
+      containers:
+        - name: hr-service
+          image: ${ARTIFACT_REGISTRY_URL}/hr-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5005
+              name: http
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: hr-service-config
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5005
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5005
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hr-service
+  namespace: default
+  labels:
+    app: hr-service
+    component: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5005
+      targetPort: 5005
+      protocol: TCP
+      name: http
+  selector:
+    app: hr-service
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hr-service-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hr-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80

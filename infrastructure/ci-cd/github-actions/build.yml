@@ -1,0 +1,92 @@
+name: Build and Push Docker Images
+
+on:
+  pull_request:
+    branches: [main, staging, develop]
+  push:
+    branches: [main, staging, develop]
+
+env:
+  REGISTRY: us-central1-docker.pkg.dev
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REPOSITORY: konecta-erp
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    strategy:
+      matrix:
+        service:
+          - name: config-server
+            context: konecta_erp/backend/config
+            dockerfile: konecta_erp/backend/config/Dockerfile
+          - name: api-gateway
+            context: konecta_erp/backend/ApiGateWay
+            dockerfile: konecta_erp/backend/ApiGateWay/Dockerfile
+          - name: authentication-service
+            context: konecta_erp
+            dockerfile: konecta_erp/backend/AuthenticationService/Dockerfile
+          - name: hr-service
+            context: konecta_erp
+            dockerfile: konecta_erp/backend/HrService/Dockerfile
+          - name: inventory-service
+            context: konecta_erp
+            dockerfile: konecta_erp/backend/InventoryService/Dockerfile
+          - name: finance-service
+            context: konecta_erp
+            dockerfile: konecta_erp/backend/FinanceService/Dockerfile
+          - name: user-management-service
+            context: konecta_erp
+            dockerfile: konecta_erp/backend/UserManagementService/Dockerfile
+          - name: reporting-service
+            context: konecta_erp/backend/ReportingService
+            dockerfile: konecta_erp/backend/ReportingService/Dockerfile
+          - name: frontend
+            context: konecta_erp/frontend
+            dockerfile: konecta_erp/frontend/Dockerfile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      - name: Determine environment tag
+        id: env-tag
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "tag=prod-latest" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "tag=staging-latest" >> $GITHUB_OUTPUT
+          else
+            echo "tag=dev-latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push ${{ matrix.service.name }}
+        run: |
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.service.name }}"
+          docker build \
+            -t ${IMAGE_NAME}:${{ github.sha }} \
+            -t ${IMAGE_NAME}:${{ steps.env-tag.outputs.tag }} \
+            -f ${{ matrix.service.dockerfile }} \
+            ${{ matrix.service.context }}
+          docker push ${IMAGE_NAME}:${{ github.sha }}
+          docker push ${IMAGE_NAME}:${{ steps.env-tag.outputs.tag }}
+
+      - name: Output image digest
+        run: |
+          echo "Image: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.service.name }}:${{ github.sha }}"
