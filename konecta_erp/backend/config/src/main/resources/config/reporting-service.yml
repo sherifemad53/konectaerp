@@ -7,7 +7,7 @@ spring:
   cloud:
     consul:
       host: ${CONSUL_URI}
-      port: 8500
+      port: ${CONSUL_PORT:8500}
       discovery:
         register: ${CONSUL_REGISTER:true}
         service-name: ${spring.application.name}
@@ -22,7 +22,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${JWT_JWKS_URI:http://authentication-service:7280/.well-known/jwks.json}
+          jwk-set-uri: ${AUTH_JWKS_URI:http://authentication-service:7280/.well-known/jwks.json}
 
 services:
   finance:

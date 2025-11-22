@@ -2,10 +2,10 @@ ConnectionStrings:
   DefaultConnection: Server=${DB_HOST},1433;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
 
 RabbitMq:
-  HostName: rabbitmq
-  Port: 5672
-  UserName: guest
-  Password: guest
+  HostName: ${RABBITMQ_HOST:rabbitmq}
+  Port: ${RABBITMQ_PORT:5672}
+  UserName: ${RABBITMQ_USER:guest}
+  Password: ${RABBITMQ_PASS:guest}
   VirtualHost: /
   Exchange: konecta.erp
   EmployeeCreatedQueue: auth.employee-created
@@ -21,8 +21,8 @@ RabbitMq:
 Email:
   FromAddress: no-reply@konecta.local
   FromDisplayName: Konecta HR
-  SmtpHost: mailhog
-  SmtpPort: 1025
+  SmtpHost: ${SMTP_HOST:mailhog}
+  SmtpPort: ${SMTP_PORT:1025}
   UseSsl: false
   UserName: ""
   Password: ""
@@ -88,7 +88,7 @@ JwtSettings:
         -----END PUBLIC KEY-----
 
 ServiceAuth:
-  SharedSecret: KonectaSharedSecret!
+  SharedSecret: ${SHARED_SECRET:KonectaSharedSecret!}
   UserManagementBaseUrl: ${USER_MANAGEMENT_SERVICE_URI}
 Consul:
   Host: ${CONSUL_URI}
