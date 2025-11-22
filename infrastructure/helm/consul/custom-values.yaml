@@ -8,8 +8,8 @@ global:
 
 server:
   enabled: true
-  replicas: 3
-  bootstrapExpect: 3
+  replicas: 1
+  bootstrapExpect: 1
 
   storage: 10Gi
   storageClass: standard-rwo

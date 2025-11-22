@@ -51,7 +51,7 @@ terraform apply
 # Get kubectl credentials
 gcloud container clusters get-credentials konecta-erp-cluster \
   --region us-central1 \
-  --project YOUR_PROJECT_ID
+  --project erp-system-478020
 ```
 
 ### 2. Deploy Artifact Registry
@@ -90,41 +90,41 @@ gcloud auth configure-docker us-central1-docker.pkg.dev
 
 # Build and push all images (example for one service)
 cd konecta_erp
-docker build -t ${ARTIFACT_REGISTRY_URL}/authentication-service:dev-latest \
+docker build -t ${ARTIFACT_REGISTRY_URL}/authentication-service:latest \
   -f backend/AuthenticationService/Dockerfile .
-docker push ${ARTIFACT_REGISTRY_URL}/authentication-service:dev-latest
+docker push ${ARTIFACT_REGISTRY_URL}/authentication-service:latest
 
-docker build -t ${ARTIFACT_REGISTRY_URL}/hr-service:dev-latest \
+docker build -t ${ARTIFACT_REGISTRY_URL}/hr-service:latest \
   -f backend/HrService/Dockerfile .
-docker push ${ARTIFACT_REGISTRY_URL}/hr-service:dev-latest
+docker push ${ARTIFACT_REGISTRY_URL}/hr-service:latest
 
-docker build -t ${ARTIFACT_REGISTRY_URL}/inventory-service:dev-latest \
+docker build -t ${ARTIFACT_REGISTRY_URL}/inventory-service:latest \
   -f backend/InventoryService/Dockerfile .
-docker push ${ARTIFACT_REGISTRY_URL}/inventory-service:dev-latest
+docker push ${ARTIFACT_REGISTRY_URL}/inventory-service:latest
 
-docker build -t ${ARTIFACT_REGISTRY_URL}/finance-service:dev-latest \
+docker build -t ${ARTIFACT_REGISTRY_URL}/finance-service:latest \
   -f backend/FinanceService/Dockerfile .
-docker push ${ARTIFACT_REGISTRY_URL}/finance-service:dev-latest
+docker push ${ARTIFACT_REGISTRY_URL}/finance-service:latest
 
-docker build -t ${ARTIFACT_REGISTRY_URL}/user-management-service:dev-latest \
+docker build -t ${ARTIFACT_REGISTRY_URL}/user-management-service:latest \
   -f backend/UserManagementService/Dockerfile .
-docker push ${ARTIFACT_REGISTRY_URL}/user-management-service:dev-latest
+docker push ${ARTIFACT_REGISTRY_URL}/user-management-service:latest
 
-docker build -t ${ARTIFACT_REGISTRY_URL}/reporting-service:dev-latest \
-  -f backend/ReportingService/Dockerfile .
-docker push ${ARTIFACT_REGISTRY_URL}/reporting-service:dev-latest
+docker build -t ${ARTIFACT_REGISTRY_URL}/reporting-service:latest \
+  -f backend/ReportingService/Dockerfile backend/ReportingService/
+docker push ${ARTIFACT_REGISTRY_URL}/reporting-service:latest
 
-docker build -t ${ARTIFACT_REGISTRY_URL}/config-server:dev-latest \
+docker build -t ${ARTIFACT_REGISTRY_URL}/config-server:latest \
   -f backend/config/Dockerfile backend/config
-docker push ${ARTIFACT_REGISTRY_URL}/config-server:dev-latest
+docker push ${ARTIFACT_REGISTRY_URL}/config-server:latest
 
-docker build -t ${ARTIFACT_REGISTRY_URL}/api-gateway:dev-latest \
+docker build -t ${ARTIFACT_REGISTRY_URL}/api-gateway:latest \
   -f backend/ApiGateWay/Dockerfile backend/ApiGateWay/
-docker push ${ARTIFACT_REGISTRY_URL}/api-gateway:dev-latest
+docker push ${ARTIFACT_REGISTRY_URL}/api-gateway:latest
 
-docker build -t ${ARTIFACT_REGISTRY_URL}/frontend:dev-latest \
+docker build -t ${ARTIFACT_REGISTRY_URL}/frontend:latest \
   -f frontend/Dockerfile frontend
-docker push ${ARTIFACT_REGISTRY_URL}/frontend:dev-latest
+docker push ${ARTIFACT_REGISTRY_URL}/frontend:latest
 
 
 # Repeat for all services or use the CI/CD pipeline

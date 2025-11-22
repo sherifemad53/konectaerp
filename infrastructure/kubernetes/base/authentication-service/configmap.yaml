@@ -7,5 +7,5 @@ data:
   ASPNETCORE_ENVIRONMENT: "Development"
   SPRING__APPLICATION__NAME: "authentication-service"
   SPRING__CLOUD__CONFIG__URI: "http://config-server:8888"
-  SPRING__CLOUD__CONFIG__FAILFAST: "true"
+  SPRING__CLOUD__CONFIG__FAILFAST: "false"
   Consul__Host: "http://consul-server:8500"

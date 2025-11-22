@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: config-server
-          image: ${ARTIFACT_REGISTRY_URL}/config-server:latest
+          image: us-central1-docker.pkg.dev/erp-system-478020/konecta-erp/config-server:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8888

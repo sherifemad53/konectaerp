@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ${ARTIFACT_REGISTRY_URL}/frontend:latest
+          image: us-central1-docker.pkg.dev/erp-system-478020/konecta-erp/frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80

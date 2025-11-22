@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: ${ARTIFACT_REGISTRY_URL}/api-gateway:latest
+          image: us-central1-docker.pkg.dev/erp-system-478020/konecta-erp/api-gateway:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -28,6 +28,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: api-gateway-config
+          env:
+            - name: SHARED_SECRET
+              value: "KonectaSharedSecret!"
+            - name: PUBLIC_HOST
+              value: "api-gateway"
           resources:
             requests:
               memory: "512Mi"
