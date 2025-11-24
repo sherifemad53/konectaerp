@@ -19,6 +19,11 @@ master_ipv4_cidr_block = "172.16.0.0/28"
 enable_private_nodes    = true
 enable_private_endpoint = false
 
+#Node pool configuration
+machine_type   = "e2-standard-4"
+min_node_count = 1
+max_node_count = 5
+
 # Authorized networks (add your IP for kubectl access)
 authorized_networks = [
   {

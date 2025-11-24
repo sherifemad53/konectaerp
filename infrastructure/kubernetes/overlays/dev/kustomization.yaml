@@ -3,13 +3,14 @@ kind: Kustomization
 
 namespace: default
 
-bases:
+resources:
   - ../../base
 
 # namePrefix: dev-
 
-commonLabels:
-  environment: dev
+labels:
+  - pairs:
+      environment: dev
 
 # Image tags for dev environment
 images:
@@ -32,9 +33,10 @@ images:
   - name: us-central1-docker.pkg.dev/erp-system-478020/konecta-erp/frontend
     newTag: dev-latest
 
-patchesStrategicMerge:
-  - patch-replicas.yaml
-  - patch-resources.yaml
+patches:
+  - path: patch-replicas.yaml
+  - path: patch-resources.yaml
+  - path: patch-hpa.yaml
 
 configMapGenerator:
   - name: environment-config

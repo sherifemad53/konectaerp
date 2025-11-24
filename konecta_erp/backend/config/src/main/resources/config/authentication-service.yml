@@ -1,11 +1,11 @@
 ConnectionStrings:
-  DefaultConnection: Server=${DB_HOST},1433;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
+  DefaultConnection: Server=sqlserver,1433;Database=Konecta_Auth;User Id=sa;Password=pa55w0rd!;TrustServerCertificate=True;
 
 RabbitMq:
-  HostName: ${RABBITMQ_HOST:rabbitmq}
-  Port: ${RABBITMQ_PORT:5672}
-  UserName: ${RABBITMQ_USER:guest}
-  Password: ${RABBITMQ_PASS:guest}
+  HostName: rabbitmq
+  Port: 5672
+  UserName: guest
+  Password: guest
   VirtualHost: /
   Exchange: konecta.erp
   EmployeeCreatedQueue: auth.employee-created
@@ -88,10 +88,11 @@ JwtSettings:
         -----END PUBLIC KEY-----
 
 ServiceAuth:
-  SharedSecret: ${SHARED_SECRET:KonectaSharedSecret!}
-  UserManagementBaseUrl: ${USER_MANAGEMENT_SERVICE_URI}
+  SharedSecret: KonectaSharedSecret!
+  UserManagementBaseUrl: http://user-management-service:5078
+
 Consul:
-  Host: ${CONSUL_URI}
+  Host: http://consul-server:8500
 
 ServiceConfig:
   ServiceName: authentication-service

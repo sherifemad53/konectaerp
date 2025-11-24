@@ -36,8 +36,9 @@ spring:
         - id: authentication-service
           uri: ${upstreams.authentication}
           predicates:
-            - Path=/auth/**
+            - Path=/api/auth/**
           filters:
+            - StripPrefix: 1
             - name: RewritePath
               args:
                 regexp: ^/auth/(?<segment>.*)
@@ -49,8 +50,9 @@ spring:
         - id: hr-service
           uri: ${upstreams.hr}
           predicates:
-            - Path=/hr/**
+            - Path=/api/hr/**
           filters:
+            - StripPrefix=1
             - name: RewritePath
               args:
                 regexp: ^/hr/(?<remaining>.*)
@@ -62,7 +64,7 @@ spring:
         - id: user-management-service
           uri: ${upstreams.userManagement}
           predicates:
-            - Path=/users/**
+            - Path=/api/users/**
           filters:
             - StripPrefix=1
             - name: CircuitBreaker
@@ -72,7 +74,7 @@ spring:
         - id: inventory-service
           uri: ${upstreams.inventory}
           predicates:
-            - Path=/inventory/**
+            - Path=/api/inventory/**
           filters:
             - StripPrefix=1
             - name: CircuitBreaker
@@ -82,7 +84,7 @@ spring:
         - id: finance-service
           uri: ${upstreams.finance}
           predicates:
-            - Path=/finance/**
+            - Path=/api/finance/**
           filters:
             - StripPrefix=1
             - name: CircuitBreaker
@@ -92,7 +94,7 @@ spring:
         - id: reporting-service
           uri: ${upstreams.reporting}
           predicates:
-            - Path=/reports/**
+            - Path=/api/reports/**
           filters:
             - StripPrefix=1
             - name: CircuitBreaker
@@ -131,6 +133,15 @@ management:
 resilience4j:
   circuitbreaker:
     configs:
+      defaults:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 10s
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
       default:
         registerHealthIndicator: true
         slidingWindowType: COUNT_BASED
@@ -142,19 +153,19 @@ resilience4j:
         automaticTransitionFromOpenToHalfOpenEnabled: true
     instances:
       authenticationServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       hrServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       userManagementServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       inventoryServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       financeServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       reportingServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       defaultCircuitBreaker:
-        base-config: default
+        base-config: defaults
 
 logging:
   level:

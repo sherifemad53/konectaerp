@@ -8,8 +8,8 @@ global:
 
 server:
   enabled: true
-  replicas: 1
-  bootstrapExpect: 1
+  replicas: 3
+  bootstrapExpect: 3
 
   storage: 10Gi
   storageClass: standard-rwo
@@ -19,18 +19,20 @@ server:
       memory: "512Mi"
       cpu: "500m"
     limits:
-      memory: "1Gi"
+      memory: "512Mi"
       cpu: "500m"
 
   affinity: |
     podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              app: {{ template "consul.name" . }}
-              release: "{{ .Release.Name }}"
-              component: server
-          topologyKey: kubernetes.io/hostname
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app: {{ template "consul.name" . }}
+                release: "{{ .Release.Name }}"
+                component: server
+            topologyKey: kubernetes.io/hostname
 
 client:
   enabled: true
@@ -41,7 +43,7 @@ client:
       memory: "256Mi"
       cpu: "100m"
     limits:
-      memory: "512Mi"
+      memory: "256Mi"
       cpu: "200m"
 
 ui:

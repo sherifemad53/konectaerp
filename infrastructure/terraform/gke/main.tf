@@ -55,8 +55,12 @@ resource "google_container_cluster" "primary" {
   location = var.region
   project  = var.project_id
 
-  # Autopilot mode
-  enable_autopilot = true
+  # Standard mode (Autopilot disabled)
+  # enable_autopilot = false -> Removed to avoid conflict with remove_default_node_pool
+
+  # We want to manage our own node pools
+  remove_default_node_pool = true
+  initial_node_count       = 1
 
   # Network configuration
   network    = google_compute_network.vpc.id
@@ -142,7 +146,38 @@ resource "google_container_cluster" "primary" {
   }
 
   # Deletion protection
-  deletion_protection = true
+  deletion_protection = false
+}
+
+# Node Pool
+resource "google_container_node_pool" "primary_nodes" {
+  name     = "${var.cluster_name}-node-pool"
+  location = var.region
+  cluster  = google_container_cluster.primary.name
+  project  = var.project_id
+
+  # Autoscaling configuration
+  autoscaling {
+    min_node_count = var.min_node_count
+    max_node_count = var.max_node_count
+  }
+
+  node_config {
+    preemptible  = false
+    machine_type = var.machine_type
+
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    service_account = google_service_account.gke_workload.email
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+
+    labels = {
+      environment = var.environment
+    }
+
+    tags = ["gke-node", "${var.cluster_name}-node"]
+  }
 }
 
 # Service Account for Workload Identity

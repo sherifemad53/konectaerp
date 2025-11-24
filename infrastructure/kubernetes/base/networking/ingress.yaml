@@ -5,8 +5,8 @@ metadata:
   namespace: default
   annotations:
     kubernetes.io/ingress.class: "gce"
-    kubernetes.io/ingress.global-static-ip-name: "konecta-erp-ingress-ip"
-    networking.gke.io/managed-certificates: "konecta-erp-cert"
+    # kubernetes.io/ingress.global-static-ip-name: "konecta-erp-ingress-ip"
+    # networking.gke.io/managed-certificates: "konecta-erp-cert"
     kubernetes.io/ingress.allow-http: "true"
   labels:
     app: konecta-erp

@@ -77,3 +77,21 @@ variable "authorized_networks" {
   }))
   default = []
 }
+
+variable "machine_type" {
+  description = "Machine type for the node pool"
+  type        = string
+  default     = "e2-standard-4"
+}
+
+variable "min_node_count" {
+  description = "Minimum number of nodes in the pool"
+  type        = number
+  default     = 1
+}
+
+variable "max_node_count" {
+  description = "Maximum number of nodes in the pool"
+  type        = number
+  default     = 5
+}

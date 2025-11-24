@@ -50,7 +50,7 @@ Release/
 !launchSettings.json
 
 # Ignore other appsettings files (e.g., appsettings.Staging.json, appsettings.Test.json, etc.)
-appsettings.*.json
+# appsettings.*.json
 !appsettings.Development.json
 !appsettings.Production.json
 

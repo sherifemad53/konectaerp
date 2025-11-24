@@ -8,3 +8,4 @@ data:
   CONSUL_HOST: "consul-server"
   CONSUL_PORT: "8500"
   CONSUL_ENDPOINT: "http://consul-server:8500"
+  CONSUL_URI: "http://consul-server:8500"
