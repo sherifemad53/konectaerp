@@ -22,7 +22,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${AUTH_JWKS_URI:http://authentication-service:7280/.well-known/jwks.json}
+          jwk-set-uri: http://authentication-service:7280/.well-known/jwks.json
 
 services:
   finance:

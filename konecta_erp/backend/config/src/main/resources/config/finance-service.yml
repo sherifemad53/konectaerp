@@ -1,5 +1,5 @@
 ConnectionStrings:
-  DefaultConnection: Server=sqlserver,1433;Database=Konecta_Auth;User Id=sa;Password=pa55w0rd!;TrustServerCertificate=True;
+  DefaultConnection: Server=sqlserver,1433;Database=Konecta_Finance;User Id=sa;Password=pa55w0rd!;TrustServerCertificate=True;
 
 RabbitMq:
   HostName: rabbitmq
@@ -19,7 +19,7 @@ Consul:
 JwtSettings:
   Issuer: KonectaERP
   Audience: KonectaERPUsers
-  JwksUri: ${AUTH_JWKS_URI:http://authentication-service:7280/.well-known/jwks.json}
+  JwksUri: http://authentication-service:7280/.well-known/jwks.json
   RequireHttpsMetadata: false
   CacheDurationMinutes: 30
 

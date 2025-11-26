@@ -38,11 +38,11 @@ spring:
           predicates:
             - Path=/api/auth/**
           filters:
-            - StripPrefix: 1
-            - name: RewritePath
-              args:
-                regexp: ^/auth/(?<segment>.*)
-                replacement: /api/auth/${segment}
+            # - StripPrefix: 1
+            # - name: RewritePath
+            #   args:
+            #     regexp: ^/auth/(?<segment>.*)
+            #     replacement: /api/auth/${segment}
             - name: CircuitBreaker
               args:
                 name: authenticationServiceCircuitBreaker
@@ -52,7 +52,7 @@ spring:
           predicates:
             - Path=/api/hr/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=1
             - name: RewritePath
               args:
                 regexp: ^/hr/(?<remaining>.*)
@@ -66,7 +66,7 @@ spring:
           predicates:
             - Path=/api/users/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: userManagementServiceCircuitBreaker
@@ -76,7 +76,7 @@ spring:
           predicates:
             - Path=/api/inventory/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: inventoryServiceCircuitBreaker
@@ -86,7 +86,7 @@ spring:
           predicates:
             - Path=/api/finance/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: financeServiceCircuitBreaker
@@ -96,7 +96,7 @@ spring:
           predicates:
             - Path=/api/reports/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: reportingServiceCircuitBreaker

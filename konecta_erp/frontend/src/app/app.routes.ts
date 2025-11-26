@@ -21,6 +21,10 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'access-denied',
+    loadComponent: () => import('./core/pages/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)
+  },
+  {
     path: '',
     component: MainLayoutComponent,
     canActivate: [authGuard],

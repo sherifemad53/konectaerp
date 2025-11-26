@@ -38,11 +38,21 @@ export class LoginComponent {
     this.loading = true;
 
     this.auth.login(this.form.getRawValue())
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(() => {
+        console.log('Login finalize called');
+        this.loading = false;
+      }))
       .subscribe({
-        next: () => this.router.navigate(['/users']),
-        error: () => {
+        next: () => {
+          console.log('Login next handler called, navigating to /users');
+          this.router.navigate(['/users']);
+        },
+        error: (err) => {
+          console.error('Login error handler called:', err);
           this.errorMessage = 'Unable to sign in. Please verify your credentials.';
+        },
+        complete: () => {
+          console.log('Login observable completed');
         }
       });
   }

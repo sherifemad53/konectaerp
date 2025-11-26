@@ -24,7 +24,17 @@ public class ApigateApplication {
 			logger.info("Management Port: {}", env.getProperty("management.server.port"));
 			logger.info("Consul Host: {}", env.getProperty("spring.cloud.consul.host"));
 			logger.info("Consul Port: {}", env.getProperty("spring.cloud.consul.port"));
+
+			logger.info("AUTHENTICATION SERVICE URL: {}", env.getProperty("upstreams.authentication"));
+			logger.info("HR SERVICE URL: {}", env.getProperty("upstreams.hr"));
+			logger.info("USER MANAGEMENT SERVICE URL: {}", env.getProperty("upstreams.userManagement"));
+			logger.info("INVENTORY SERVICE URL: {}", env.getProperty("upstreams.inventory"));
+			logger.info("FINANCE SERVICE URL: {}", env.getProperty("upstreams.finance"));
+			logger.info("REPORTING SERVICE URL: {}", env.getProperty("upstreams.reporting"));
 			logger.info("==================================================================================");
+
+
+			
 		};
 	}
 

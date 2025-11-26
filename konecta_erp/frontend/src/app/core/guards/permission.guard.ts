@@ -11,6 +11,7 @@ export const permissionGuard: CanActivateFn = (route) => {
     return true;
   }
 
-  router.navigate(['/']);
+  console.warn('Permission denied for:', permission, 'Current permissions:', auth.currentSession()?.permissions);
+  router.navigate(['/access-denied']);
   return false;
 };
