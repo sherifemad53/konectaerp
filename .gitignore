@@ -5,6 +5,8 @@
 *.tfstate.backup
 crash.log
 
+oldfiles/
+
 # VS/IDE
 .vs/
 .vscode/
