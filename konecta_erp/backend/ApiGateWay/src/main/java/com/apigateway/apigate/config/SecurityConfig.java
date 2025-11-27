@@ -17,14 +17,16 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
-        "/auth/**",
         "/api/auth/**",
+        "/auth/**",
         "/actuator/**",
         "/fallback/**",
         "/system/**",
         "/swagger-ui/**",
         "/v3/api-docs/**",
-        "/swagger/**"
+        "/swagger/**",
+        "/debug/**",
+        "/"
     };
 
     @Bean

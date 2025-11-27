@@ -10,6 +10,7 @@ export const authGuard: CanActivateFn = () => {
     return true;
   }
 
+  console.warn('Auth guard: User not authenticated, redirecting to login');
   router.navigate(['/auth/login']);
   return false;
 };

@@ -1,5 +1,5 @@
 ConnectionStrings:
-  DefaultConnection: Server=${DB_HOST},1433;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
+  DefaultConnection: Server=sqlserver,1433;Database=Konecta_HR;User Id=sa;Password=pa55w0rd!;TrustServerCertificate=True;
 
 RabbitMq:
   HostName: rabbitmq
@@ -19,7 +19,7 @@ RabbitMq:
   UserProvisionedRoutingKey: auth.user.provisioned
 
 Consul:
-  Host: ${CONSUL_URI}
+  Host: http://consul-server:8500
 
 JwtSettings:
   Issuer: KonectaERP

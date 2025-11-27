@@ -121,7 +121,9 @@ export class AuthService {
     return (source: Observable<ApiResponse<T>>) =>
       source.pipe(
         map(response => {
+          console.log('unwrapResponse - raw response:', response);
           const result = response.result ?? (response as any).Result ?? (response as any).data ?? null;
+          console.log('unwrapResponse - extracted result:', result);
           return result as T;
         })
       );
@@ -131,15 +133,24 @@ export class AuthService {
     return (source: Observable<LoginResult>) =>
       source.pipe(
         tap(result => {
-          const permissions = result.permissions ?? [];
+          console.log('Login response received:', result);
+          // Handle both camelCase (frontend expected) and PascalCase (backend default)
+          const r = result as any;
+          const accessToken = r.accessToken || r.AccessToken;
+          const expiresAtUtc = r.expiresAtUtc || r.ExpiresAtUtc;
+          const userId = r.userId || r.UserId;
+          const email = r.email || r.Email;
+          const roles = r.roles || r.Roles || [];
+          const permissions = r.permissions || r.Permissions || [];
+
           const session: AuthSession = {
-            token: result.accessToken,
-            userId: result.userId,
-            email: result.email,
-            roles: result.roles ?? [],
-            permissions,
-            expiresAtUtc: result.expiresAtUtc,
-            fullName: this.extractFullName(result.accessToken)
+            token: accessToken,
+            userId: userId,
+            email: email,
+            roles: roles,
+            permissions: permissions,
+            expiresAtUtc: expiresAtUtc,
+            fullName: this.extractFullName(accessToken)
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
           this.sessionSignal.set(session);

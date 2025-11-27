@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace AuthenticationService.Controllers
 {
@@ -18,17 +19,20 @@ namespace AuthenticationService.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IJwtService _jwtService;
         private readonly IUserManagementClient _userManagementClient;
+        private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IJwtService jwtService,
-            IUserManagementClient userManagementClient)
+            IUserManagementClient userManagementClient,
+            ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtService = jwtService;
             _userManagementClient = userManagementClient;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -76,8 +80,12 @@ namespace AuthenticationService.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginRequest request)
         {
+            _logger.LogInformation("Login attempt for email: {Email}", request.Email);
+
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
+            {
+                _logger.LogWarning("Login failed: User not found for email: {Email}", request.Email);
                 return Unauthorized(new GenericResponse
                 {
                     Result = null,
@@ -85,9 +93,12 @@ namespace AuthenticationService.Controllers
                     C_Message = "Invalid email or password.",
                     S_Message = "User not found during login."
                 });
+            }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
             if (!result.Succeeded)
+            {
+                _logger.LogWarning("Login failed: Password verification failed for email: {Email}", request.Email);
                 return Unauthorized(new GenericResponse
                 {
                     Result = null,
@@ -95,15 +106,28 @@ namespace AuthenticationService.Controllers
                     C_Message = "Invalid email or password.",
                     S_Message = "Password verification failed."
                 });
+            }
 
+            _logger.LogInformation("User authenticated successfully: {Email}. Retrieving roles...", request.Email);
             var roles = await _userManager.GetRolesAsync(user);
+            
+            _logger.LogInformation("Retrieving authorization profile for user: {UserId}", user.Id);
             var authorizationProfile = await _userManagementClient.GetAuthorizationProfileAsync(user.Id, HttpContext.RequestAborted);
+
+            if (authorizationProfile == null)
+            {
+                _logger.LogWarning("Authorization profile is null for user: {UserId}", user.Id);
+            }
+
             IReadOnlyCollection<string> aggregatedRoles = authorizationProfile?.Roles?.Count > 0 
                 ? authorizationProfile.Roles 
                 : roles.ToList().AsReadOnly();
             var aggregatedPermissions = authorizationProfile?.Permissions ?? Array.Empty<string>();
+            
+            _logger.LogInformation("Generating token for user: {UserId} with {RoleCount} roles and {PermissionCount} permissions", user.Id, aggregatedRoles.Count, aggregatedPermissions.Count);
             var token = _jwtService.GenerateToken(user, aggregatedRoles, aggregatedPermissions);
 
+            _logger.LogInformation("Login successful for user: {Email}", request.Email);
             return Ok(new GenericResponse
             {
                 Result = new

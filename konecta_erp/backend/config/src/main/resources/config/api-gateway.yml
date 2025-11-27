@@ -36,12 +36,13 @@ spring:
         - id: authentication-service
           uri: ${upstreams.authentication}
           predicates:
-            - Path=/auth/**
+            - Path=/api/auth/**
           filters:
-            - name: RewritePath
-              args:
-                regexp: ^/auth/(?<segment>.*)
-                replacement: /api/auth/${segment}
+            # - StripPrefix: 1
+            # - name: RewritePath
+            #   args:
+            #     regexp: ^/auth/(?<segment>.*)
+            #     replacement: /api/auth/${segment}
             - name: CircuitBreaker
               args:
                 name: authenticationServiceCircuitBreaker
@@ -49,8 +50,9 @@ spring:
         - id: hr-service
           uri: ${upstreams.hr}
           predicates:
-            - Path=/hr/**
+            - Path=/api/hr/**
           filters:
+            # - StripPrefix=1
             - name: RewritePath
               args:
                 regexp: ^/hr/(?<remaining>.*)
@@ -62,9 +64,9 @@ spring:
         - id: user-management-service
           uri: ${upstreams.userManagement}
           predicates:
-            - Path=/users/**
+            - Path=/api/users/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: userManagementServiceCircuitBreaker
@@ -72,9 +74,9 @@ spring:
         - id: inventory-service
           uri: ${upstreams.inventory}
           predicates:
-            - Path=/inventory/**
+            - Path=/api/inventory/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: inventoryServiceCircuitBreaker
@@ -82,9 +84,9 @@ spring:
         - id: finance-service
           uri: ${upstreams.finance}
           predicates:
-            - Path=/finance/**
+            - Path=/api/finance/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: financeServiceCircuitBreaker
@@ -92,9 +94,9 @@ spring:
         - id: reporting-service
           uri: ${upstreams.reporting}
           predicates:
-            - Path=/reports/**
+            - Path=/api/reports/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: reportingServiceCircuitBreaker
@@ -103,17 +105,17 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${AUTH_JWKS_URI:http://localhost:7280/.well-known/jwks.json}
+          jwk-set-uri: ${AUTH_JWKS_URI:http://authentication-service:7280/.well-known/jwks.json}
 server:
   port: ${SERVER_PORT:8080}
 
 upstreams:
-  authentication: ${AUTH_SERVICE_URI}
-  hr: ${HR_SERVICE_URI}
-  userManagement: ${USER_MANAGEMENT_SERVICE_URI}
-  inventory: ${INVENTORY_SERVICE_URI}
-  finance: ${FINANCE_SERVICE_URI}
-  reporting: ${REPORTING_SERVICE_URI}
+  authentication: ${AUTH_SERVICE_URI:http://authentication-service:7280}
+  hr: ${HR_SERVICE_URI:http://hr-service:5005}
+  userManagement: ${USER_MANAGEMENT_SERVICE_URI:http://user-management-service:5078}
+  inventory: ${INVENTORY_SERVICE_URI:http://inventory-service:5020}
+  finance: ${FINANCE_SERVICE_URI:http://finance-service:5003}
+  reporting: ${REPORTING_SERVICE_URI:http://reporting-service:8085}
 
 management:
   server:
@@ -131,6 +133,15 @@ management:
 resilience4j:
   circuitbreaker:
     configs:
+      defaults:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 10s
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
       default:
         registerHealthIndicator: true
         slidingWindowType: COUNT_BASED
@@ -142,19 +153,19 @@ resilience4j:
         automaticTransitionFromOpenToHalfOpenEnabled: true
     instances:
       authenticationServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       hrServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       userManagementServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       inventoryServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       financeServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       reportingServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       defaultCircuitBreaker:
-        base-config: default
+        base-config: defaults
 
 logging:
   level:

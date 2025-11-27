@@ -1,13 +1,13 @@
 ConnectionStrings:
-  DefaultConnection: Server=${DB_HOST},1433;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
+  DefaultConnection: Server=sqlserver,1433;Database=Konecta_Inventory;User Id=sa;Password=pa55w0rd!;TrustServerCertificate=True;
 
 Consul:
-  Host: ${CONSUL_URI}
+  Host: http://consul-server:8500
 
 JwtSettings:
   Issuer: KonectaERP
   Audience: KonectaERPUsers
-  JwksUri: http://authentication-service:7280/.well-known/jwks.json
+  JwksUri: http://authentication-service:7280/.well-known/jwks.json}
   RequireHttpsMetadata: false
   CacheDurationMinutes: 30
 

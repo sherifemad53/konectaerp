@@ -32,12 +32,8 @@ spring:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials,RETAIN_FIRST
       globalcors:
         corsConfigurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:4200"
-              - "http://127.0.0.1:4200"
-              - "http://frontend:80"
-              - "http://frontend:4200"
+          "[/**]":
+            allowedOrigins: "*"
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: false
@@ -46,12 +42,12 @@ spring:
         - id: authentication-service
           uri: ${upstreams.authentication}
           predicates:
-            - Path=/auth/**
+            - Path=/api/auth/**
           filters:
-            - name: RewritePath
-              args:
-                regexp: ^/auth/(?<segment>.*)
-                replacement: /api/auth/${segment}
+            # - name: RewritePath
+            #   args:
+            #     regexp: ^/auth/(?<segment>.*)
+            #     replacement: /api/auth/${segment}
             - name: CircuitBreaker
               args:
                 name: authenticationServiceCircuitBreaker
@@ -59,11 +55,11 @@ spring:
         - id: hr-service
           uri: ${upstreams.hr}
           predicates:
-            - Path=/hr/**
+            - Path=/api/hr/**
           filters:
             - name: RewritePath
               args:
-                regexp: ^/hr/(?<remaining>.*)
+                regexp: ^/api/hr/(?<remaining>.*)
                 replacement: /${remaining}
             - name: CircuitBreaker
               args:
@@ -81,9 +77,13 @@ spring:
         - id: user-management-service
           uri: ${upstreams.userManagement}
           predicates:
-            - Path=/users/**
+            - Path=/api/users/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
+            - name: RewritePath
+              args:
+                regexp: ^/api/users/(?<remaining>.*)
+                replacement: /${remaining}
             - name: CircuitBreaker
               args:
                 name: userManagementServiceCircuitBreaker
@@ -100,9 +100,13 @@ spring:
         - id: inventory-service
           uri: ${upstreams.inventory}
           predicates:
-            - Path=/inventory/**
+            - Path=/api/inventory/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
+            - name: RewritePath
+              args:
+                regexp: ^/api/inventory/(?<remaining>.*)
+                replacement: /${remaining}
             - name: CircuitBreaker
               args:
                 name: inventoryServiceCircuitBreaker
@@ -119,9 +123,13 @@ spring:
         - id: finance-service
           uri: ${upstreams.finance}
           predicates:
-            - Path=/finance/**
+            - Path=/api/finance/**
           filters:
-            - StripPrefix=1
+            # - StripPrefix=2
+            - name: RewritePath
+              args:
+                regexp: ^/api/finance/(?<remaining>.*)
+                replacement: /${remaining}
             - name: CircuitBreaker
               args:
                 name: financeServiceCircuitBreaker
@@ -138,9 +146,9 @@ spring:
         - id: reporting-service
           uri: ${upstreams.reporting}
           predicates:
-            - Path=/reports/**
+            - Path=/api/reports/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: reportingServiceCircuitBreaker
@@ -231,6 +239,15 @@ management:
 resilience4j:
   circuitbreaker:
     configs:
+      defaults:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 10s
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
       default:
         registerHealthIndicator: true
         slidingWindowType: COUNT_BASED
@@ -242,23 +259,24 @@ resilience4j:
         automaticTransitionFromOpenToHalfOpenEnabled: true
     instances:
       authenticationServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       hrServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       userManagementServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       inventoryServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       financeServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       reportingServiceCircuitBreaker:
-        base-config: default
+        base-config: defaults
       defaultCircuitBreaker:
-        base-config: default
+        base-config: defaults
 
 logging:
   level:
-    org.springframework.cloud.gateway: INFO
-    org.springframework.cloud.consul: INFO
-
-
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.consul: DEBUG
+    com.apigateway: DEBUG
+    org.springframework.boot.actuate: DEBUG
+    org.springframework.web: DEBUG

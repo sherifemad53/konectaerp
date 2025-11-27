@@ -2,10 +2,15 @@ import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './core/layout/main-layout.component';
 import { authGuard } from './core/guards/auth.guard';
 import { permissionGuard } from './core/guards/permission.guard';
+import { AccessDeniedComponent } from './core/pages/access-denied/access-denied.component';
 
 const loadLoginComponent = () => import('./auth/login/login.component').then(m => m.LoginComponent);
 const loadRegisterComponent = () => import('./auth/register/register.component').then(m => m.RegisterComponent);
+const loadDashboardComponent = () => import('./dashboard/dashboard').then(m => m.Dashboard);
 const loadUserManagementComponent = () => import('./usermanagement/user-management.component').then(m => m.UserManagementComponent);
+const loadInventoryComponent = () => import('./inventory/inventory').then(m => m.Inventory);
+const loadFinanceComponent = () => import('./finance/finance').then(m => m.Finance);
+const loadReportingComponent = () => import('./reporting/reporting').then(m => m.Reporting);
 const loadHrEmployeesComponent = () => import('./hr/hr-employees.component').then(m => m.HrEmployeesComponent);
 const loadAuthApiConsoleComponent = () => import('./auth/auth-api-console.component').then(m => m.AuthApiConsoleComponent);
 const loadUserManagementApiConsoleComponent = () => import('./usermanagement/user-management-api-console.component').then(m => m.UserManagementApiConsoleComponent);
@@ -21,17 +26,43 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'access-denied',
+    component: AccessDeniedComponent
+  },
+  {
     path: '',
     component: MainLayoutComponent,
     canActivate: [authGuard],
     canActivateChild: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'users' },
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'dashboard',
+        loadComponent: loadDashboardComponent
+      },
       {
         path: 'users',
         loadComponent: loadUserManagementComponent,
         canActivate: [permissionGuard],
         data: { permission: 'user-management.users.read' }
+      },
+      {
+        path: 'inventory',
+        loadComponent: loadInventoryComponent,
+        canActivate: [permissionGuard],
+        data: { permission: 'inventory.items.read' }
+      },
+      {
+        path: 'finance',
+        loadComponent: loadFinanceComponent,
+        canActivate: [permissionGuard],
+        data: { permission: 'finance.transactions.read' }
+      },
+      {
+        path: 'reporting',
+        loadComponent: loadReportingComponent,
+        canActivate: [permissionGuard],
+        data: { permission: 'reporting.reports.read' }
       },
       {
         path: 'hr',
