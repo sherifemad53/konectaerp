@@ -1,0 +1,46 @@
+server:
+  port: ${SERVER_PORT:8085}
+
+spring:
+  application:
+    name: reporting-service
+  cloud:
+    consul:
+      host: ${CONSUL_URI}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        register: ${CONSUL_REGISTER:true}
+        service-name: ${spring.application.name}
+        instance-id: ${spring.application.name}-${random.value}
+        hostname: ${CONSUL_SERVICE_HOST:host.docker.internal}
+        prefer-ip-address: false
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+      config:
+        enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://authentication-service:7280/.well-known/jwks.json
+
+services:
+  finance:
+    url: ${FINANCE_SERVICE_URI}
+  hr:
+    url: ${HR_SERVICE_URI}
+  inventory:
+    url: ${INVENTORY_SERVICE_URI}
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
