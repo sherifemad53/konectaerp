@@ -36,6 +36,7 @@ patchesStrategicMerge:
   - patch-replicas.yaml
   - patch-resources.yaml
   - patch-hpa.yaml
+  - monitoring-patch.yaml
 
 # Remove MailHog in production
 patchesJson6902:

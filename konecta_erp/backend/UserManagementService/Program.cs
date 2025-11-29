@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 using SharedContracts.Authorization;
 using SharedContracts.Configuration;
 using SharedContracts.Security;
@@ -114,6 +115,7 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+app.UseHttpMetrics();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
@@ -134,6 +136,8 @@ app.MapGet("/system/fallback", () =>
         message = "Serving fallback response from User Management Service.",
         timestamp = DateTimeOffset.UtcNow
     }, statusCode: StatusCodes.Status503ServiceUnavailable)).AllowAnonymous();
+
+app.MapMetrics().AllowAnonymous();
 
 using (var scope = app.Services.CreateScope())
 {

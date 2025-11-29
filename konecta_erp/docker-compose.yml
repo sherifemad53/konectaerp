@@ -5,7 +5,7 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Developer
-      SA_PASSWORD: 'pa55w0rd!'
+      SA_PASSWORD: "pa55w0rd!"
     ports:
       - "1433:1433"
     volumes:
@@ -26,10 +26,15 @@ services:
       sqlserver:
         condition: service_healthy
     environment:
-      SA_PASSWORD: 'pa55w0rd!'
+      SA_PASSWORD: "pa55w0rd!"
     volumes:
       - ./docker/sqlserver:/scripts:ro
-    entrypoint: ["/bin/bash", "-c", "counter=0; while [ $$counter -lt 30 ]; do if /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P \"$$SA_PASSWORD\" -C -Q \"SELECT 1\" -b -h -1 > /dev/null 2>&1; then echo 'SQL Server is ready!'; /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P \"$$SA_PASSWORD\" -C -d master -i /scripts/create-databases.sql; exit 0; fi; counter=$$((counter+1)); echo \"Waiting for SQL Server... (attempt $$counter/30)\"; sleep 2; done; echo 'SQL Server connection timeout!'; exit 1"]
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        'counter=0; while [ $$counter -lt 30 ]; do if /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P "$$SA_PASSWORD" -C -Q "SELECT 1" -b -h -1 > /dev/null 2>&1; then echo ''SQL Server is ready!''; /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P "$$SA_PASSWORD" -C -d master -i /scripts/create-databases.sql; exit 0; fi; counter=$$((counter+1)); echo "Waiting for SQL Server... (attempt $$counter/30)"; sleep 2; done; echo ''SQL Server connection timeout!''; exit 1',
+      ]
     restart: "no"
     networks:
       - erp-network
@@ -55,9 +60,9 @@ services:
     networks:
       - erp-network
 
-  consul:
+  consul-server:
     image: hashicorp/consul:1.18
-    container_name: consul
+    container_name: consul-server
     command: agent -server -bootstrap -ui -client=0.0.0.0
     ports:
       - "8500:8500"
@@ -71,11 +76,11 @@ services:
     container_name: config-server
     environment:
       SERVER_PORT: 8888
-      CONSUL_HOST: consul
+      CONSUL_HOST: consul-server
       CONSUL_PORT: 8500
-      CONSUL_ENDPOINT: http://consul:8500
+      CONSUL_ENDPOINT: http://consul-server:8500
     depends_on:
-      - consul
+      - consul-server
     ports:
       - "8888:8888"
     networks:
@@ -90,7 +95,7 @@ services:
       SPRING_APPLICATION_NAME: api-gateway
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       SPRING_CLOUD_CONFIG_FAILFAST: "true"
-      CONSUL_HOST: consul
+      CONSUL_HOST: consul-server
       CONSUL_PORT: 8500
       CONSUL_SERVICE_HOST: api-gateway
       AUTH_SERVICE_URI: http://authentication-service:7280
@@ -134,7 +139,7 @@ services:
       SPRING_APPLICATION_NAME: reporting-service
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       SPRING_CLOUD_CONFIG_FAILFAST: "true"
-      CONSUL_HOST: consul
+      CONSUL_HOST: consul-server
       CONSUL_PORT: 8500
       CONSUL_SERVICE_HOST: reporting-service
       FINANCE_SERVICE_URI: http://finance-service:5003
@@ -160,7 +165,7 @@ services:
       SPRING__APPLICATION__NAME: authentication-service
       SPRING__CLOUD__CONFIG__URI: http://config-server:8888
       SPRING__CLOUD__CONFIG__FAILFAST: "true"
-      Consul__Host: http://consul:8500
+      Consul__Host: http://consul-server:8500
     depends_on:
       sqlserver-seed:
         condition: service_completed_successfully
@@ -168,7 +173,7 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
-      consul:
+      consul-server:
         condition: service_started
     ports:
       - "7280:7280"
@@ -185,13 +190,13 @@ services:
       SPRING__APPLICATION__NAME: hr-service
       SPRING__CLOUD__CONFIG__URI: http://config-server:8888
       SPRING__CLOUD__CONFIG__FAILFAST: "true"
-      Consul__Host: http://consul:8500
+      Consul__Host: http://consul-server:8500
     depends_on:
       sqlserver-seed:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_started
-      consul:
+      consul-server:
         condition: service_started
     ports:
       - "5005:5005"
@@ -208,11 +213,11 @@ services:
       SPRING__APPLICATION__NAME: inventory-service
       SPRING__CLOUD__CONFIG__URI: http://config-server:8888
       SPRING__CLOUD__CONFIG__FAILFAST: "true"
-      Consul__Host: http://consul:8500
+      Consul__Host: http://consul-server:8500
     depends_on:
       sqlserver-seed:
         condition: service_completed_successfully
-      consul:
+      consul-server:
         condition: service_started
     ports:
       - "5020:5020"
@@ -229,11 +234,11 @@ services:
       SPRING__APPLICATION__NAME: finance-service
       SPRING__CLOUD__CONFIG__URI: http://config-server:8888
       SPRING__CLOUD__CONFIG__FAILFAST: "true"
-      Consul__Host: http://consul:8500
+      Consul__Host: http://consul-server:8500
     depends_on:
       sqlserver-seed:
         condition: service_completed_successfully
-      consul:
+      consul-server:
         condition: service_started
     ports:
       - "5003:5003"
@@ -250,13 +255,13 @@ services:
       SPRING__APPLICATION__NAME: user-management-service
       SPRING__CLOUD__CONFIG__URI: http://config-server:8888
       SPRING__CLOUD__CONFIG__FAILFAST: "true"
-      Consul__Host: http://consul:8500
+      Consul__Host: http://consul-server:8500
     depends_on:
       sqlserver-seed:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_started
-      consul:
+      consul-server:
         condition: service_started
     ports:
       - "5078:5078"

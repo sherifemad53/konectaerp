@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 using SharedContracts.Authorization;
 using SharedContracts.Security;
 using SharedContracts.ServiceDiscovery;
@@ -111,6 +112,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
+app.UseHttpMetrics();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
@@ -137,5 +139,7 @@ app.MapGet("/system/fallback", () =>
         message = "Serving fallback response from HR Service.",
         timestamp = DateTimeOffset.UtcNow
     }, statusCode: StatusCodes.Status503ServiceUnavailable)).AllowAnonymous();
+
+app.MapMetrics().AllowAnonymous();
 
 app.Run();

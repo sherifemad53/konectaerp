@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
+using Prometheus;
 using SharedContracts.Configuration;
 using SharedContracts.ServiceDiscovery;
 using Steeltoe.Extensions.Configuration.ConfigServer;
@@ -203,6 +204,10 @@ if (string.Equals(serviceScheme, "https", StringComparison.OrdinalIgnoreCase))
     app.UseHttpsRedirection();
 }
 app.UseCors("AllowAll");
+
+// Prometheus metrics middleware
+app.UseHttpMetrics();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
@@ -232,5 +237,7 @@ app.MapGet("/system/fallback", () =>
         message = "Serving fallback response from Authentication Service.",
         timestamp = DateTimeOffset.UtcNow
     }, statusCode: StatusCodes.Status503ServiceUnavailable)).AllowAnonymous();
+
+app.MapMetrics().AllowAnonymous();
 
 app.Run();

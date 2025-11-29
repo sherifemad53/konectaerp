@@ -34,6 +34,7 @@ images:
 
 patchesStrategicMerge:
   - patch-resources.yaml
+  - monitoring-patch.yaml
 
 configMapGenerator:
   - name: environment-config

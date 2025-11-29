@@ -31,6 +31,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+    
+    <!-- Monitoring -->
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
+    
     <!-- Swagger -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="SendGrid" Version="9.29.2" />

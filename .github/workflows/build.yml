@@ -53,12 +53,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # - name: Load current version
+      #   id: load_version
+      #   run: |
+      #     if [ ! -f VERSION ]; then echo "1.0.0" > VERSION; fi
+      #     CURRENT=$(cat VERSION)
+      #     echo "current=$CURRENT" >> $GITHUB_OUTPUT
+
+      # - name: Increment version (patch)
+      #   id: bump_version
+      #   run: |
+      #     IFS='.' read -r major minor patch <<< "${{ steps.load_version.outputs.current }}"
+      #     patch=$((patch + 1))
+      #     NEW_VERSION="$major.$minor.$patch"
+      #     echo "$NEW_VERSION" > VERSION
+      #     echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      # - name: Commit new VERSION file
+      #   uses: stefanzweifel/git-auto-commit-action@v5
+      #   with:
+      #     file_pattern: VERSION
+      #     commit_message: "Bump version to ${{ steps.bump_version.outputs.version }}"
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          # workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          # service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-          credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -70,7 +91,7 @@ jobs:
         id: env-tag
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "tag=prod-latest" >> $GITHUB_OUTPUT
+            echo "tag=${{ steps.bump_version.outputs.version }}" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
             echo "tag=staging-latest" >> $GITHUB_OUTPUT
           else

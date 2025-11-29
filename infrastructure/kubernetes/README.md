@@ -127,6 +127,44 @@ docker build -t ${ARTIFACT_REGISTRY_URL}/frontend:latest \
 docker push ${ARTIFACT_REGISTRY_URL}/frontend:latest
 
 
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/authentication-service:dev-latest \
+  -f backend/AuthenticationService/Dockerfile .
+docker push ${ARTIFACT_REGISTRY_URL}/authentication-service:dev-latest
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/hr-service:dev-latest \
+  -f backend/HrService/Dockerfile .
+docker push ${ARTIFACT_REGISTRY_URL}/hr-service:dev-latest
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/inventory-service:dev-latest \
+  -f backend/InventoryService/Dockerfile .
+docker push ${ARTIFACT_REGISTRY_URL}/inventory-service:dev-latest
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/finance-service:dev-latest \
+  -f backend/FinanceService/Dockerfile .
+docker push ${ARTIFACT_REGISTRY_URL}/finance-service:dev-latest
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/user-management-service:dev-latest \
+  -f backend/UserManagementService/Dockerfile .
+docker push ${ARTIFACT_REGISTRY_URL}/user-management-service:dev-latest
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/reporting-service:dev-latest \
+  -f backend/ReportingService/Dockerfile backend/ReportingService/
+docker push ${ARTIFACT_REGISTRY_URL}/reporting-service:dev-latest
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/config-server:dev-latest \
+  -f backend/config/Dockerfile backend/config
+docker push ${ARTIFACT_REGISTRY_URL}/config-server:dev-latest
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/api-gateway:dev-latest \
+  -f backend/ApiGateWay/Dockerfile backend/ApiGateWay/
+docker push ${ARTIFACT_REGISTRY_URL}/api-gateway:dev-latest
+
+docker build -t ${ARTIFACT_REGISTRY_URL}/frontend:dev-latest \
+  -f frontend/Dockerfile frontend
+docker push ${ARTIFACT_REGISTRY_URL}/frontend:dev-latest
+
+
 # Repeat for all services or use the CI/CD pipeline
 ```
 
@@ -246,6 +284,69 @@ kubectl top pods
 kubectl port-forward svc/consul-ui 8500:80
 # Access at http://localhost:8500
 ```
+
+### Prometheus and Grafana
+
+**Prometheus** collects metrics from all services and Kubernetes components.
+
+**Grafana** provides visualization dashboards for monitoring.
+
+#### Access Prometheus (Dev Environment)
+
+```bash
+# Port-forward to Prometheus
+kubectl port-forward -n monitoring svc/prometheus 9090:9090
+# Access at http://localhost:9090
+
+# Check targets status
+# Navigate to Status > Targets to see all monitored services
+```
+
+#### Access Grafana (Dev Environment)
+
+```bash
+# Port-forward to Grafana
+kubectl port-forward -n monitoring svc/grafana 3000:3000
+# Access at http://localhost:3000
+
+# Default credentials:
+# Username: admin
+# Password: admin
+# (You'll be prompted to change on first login)
+```
+
+#### Access Monitoring (Staging/Prod)
+
+For staging and production environments, Prometheus and Grafana are exposed via LoadBalancer:
+
+```bash
+# Get external IPs
+kubectl get svc -n monitoring
+
+# Access Prometheus at http://<PROMETHEUS_EXTERNAL_IP>:9090
+# Access Grafana at http://<GRAFANA_EXTERNAL_IP>:3000
+```
+
+#### Pre-configured Dashboards
+
+Grafana comes with pre-configured dashboards:
+
+1. **Kubernetes Cluster Overview** - Node CPU/memory, pod counts, container restarts
+2. **Konecta ERP Services** - Service availability, HTTP request rates, error rates, response times
+
+#### Adding Metrics to Your Services
+
+To enable Prometheus scraping for your .NET services, add these annotations to your deployment pods:
+
+```yaml
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "80"
+    prometheus.io/path: "/metrics"
+```
+
+For .NET applications, use the `prometheus-net` library to expose metrics.
 
 ## 🔄 Updates and Rollbacks
 

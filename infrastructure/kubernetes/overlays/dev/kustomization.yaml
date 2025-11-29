@@ -37,6 +37,7 @@ patches:
   - path: patch-replicas.yaml
   - path: patch-resources.yaml
   - path: patch-hpa.yaml
+  - path: monitoring-patch.yaml
 
 configMapGenerator:
   - name: environment-config

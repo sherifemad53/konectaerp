@@ -44,6 +44,10 @@ resources:
 
   - frontend/all.yaml
 
+  # Monitoring
+  - prometheus
+  - grafana
+
   # Networking
   - networking/ingress.yaml
   - networking/certificate.yaml
